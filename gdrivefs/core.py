@@ -6,6 +6,7 @@ from fsspec.spec import AbstractFileSystem, AbstractBufferedFile
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from google.auth.credentials import AnonymousCredentials
+from google.oauth2 import service_account
 import pydata_google_auth
 
 
@@ -79,6 +80,10 @@ class GoogleDriveFileSystem(AbstractFileSystem):
             cred = self._connect_cache()
         elif method == 'anon':
             cred = AnonymousCredentials()
+        elif os.path.exists(method):
+            cred = service_account.Credentials.from_service_account_file(method)
+        elif isinstance(method, dict):
+            cred = service_account.Credentials.from_service_account_info(method)
         else:
             raise ValueError(f"Invalid connection method `{method}`.")
         srv = build('drive', 'v3', credentials=cred)
