@@ -44,6 +44,7 @@ class GoogleDriveFileSystem(AbstractFileSystem):
 
     def __init__(self, root_file_id=None, token="browser",
                  access="full_control", spaces='drive',
+                 get_first_file_in_case_there_are_more_one_child=True,
                  **kwargs):
         """
         Access to dgrive as a file-system
@@ -69,6 +70,7 @@ class GoogleDriveFileSystem(AbstractFileSystem):
         self.token = token
         self.spaces = spaces
         self.root_file_id = root_file_id or 'root'
+        self.get_first_file_in_case_there_are_more_one_child = get_first_file_in_case_there_are_more_one_child
         self.connect(method=token)
         if token != "anon":
             self.ls("")
@@ -236,7 +238,7 @@ class GoogleDriveFileSystem(AbstractFileSystem):
             raise FileNotFoundError(
                 f'Directory {directory_file_id} has no child '
                 f'named {child_name}')
-        if len(possible_children) == 1:
+        if len(possible_children) == 1 or self.get_first_file_in_case_there_are_more_one_child:
             return possible_children[0]
         else:
             raise KeyError(f'Directory {directory_file_id} has more than one '
